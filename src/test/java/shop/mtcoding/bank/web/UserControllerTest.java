@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.user.UserRepository;
-import shop.mtcoding.bank.dto.user.JoinRequestDto;
+import shop.mtcoding.bank.dto.user.UserRequestDto;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -38,13 +38,13 @@ public class UserControllerTest extends DummyObject {
     @Test
     void join_success_test() throws Exception {
         //given
-        JoinRequestDto joinRequestDto = new JoinRequestDto(
+        UserRequestDto userRequestDto = new UserRequestDto(
                 "love"
                 , "1234"
                 , "love@nate.com"
                 , "러브");
 
-        String requestBody = om.writeValueAsString(joinRequestDto);
+        String requestBody = om.writeValueAsString(userRequestDto);
 
         //when
         ResultActions resultActions = mvc.perform(
@@ -63,13 +63,13 @@ public class UserControllerTest extends DummyObject {
     @Test
     void join_fail_test() throws Exception {
         //given
-        JoinRequestDto joinRequestDto = new JoinRequestDto(
+        UserRequestDto userRequestDto = new UserRequestDto(
                 "ssar"
                 , "1234"
                 , "ssar@nate.com"
                 , "쌀");
 
-        String requestBody = om.writeValueAsString(joinRequestDto);
+        String requestBody = om.writeValueAsString(userRequestDto);
 
         //when
         ResultActions resultActions = mvc.perform(

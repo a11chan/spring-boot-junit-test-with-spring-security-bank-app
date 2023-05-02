@@ -10,8 +10,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
-import shop.mtcoding.bank.dto.user.JoinRequestDto;
-import shop.mtcoding.bank.dto.user.JoinResponseDto;
+import shop.mtcoding.bank.dto.user.UserRequestDto;
+import shop.mtcoding.bank.dto.user.UserResponseDto;
 
 import java.util.Optional;
 
@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class) // Spring Context 내 Bean이 없는 환경
+@ExtendWith(value = MockitoExtension.class) // Spring Context 내 Bean이 없는 환경
 public class UserServiceTest extends DummyObject {
 
     @InjectMocks
@@ -37,7 +37,7 @@ public class UserServiceTest extends DummyObject {
     @Test
     void 회원가입_test() {
         //given
-        JoinRequestDto joinRequestDto = new JoinRequestDto(
+        UserRequestDto userRequestDto = new UserRequestDto(
                 "ssar",
                 "1234",
                 "ssar@nate.com",
@@ -52,11 +52,11 @@ public class UserServiceTest extends DummyObject {
         when(userRepository.save(any())).thenReturn(ssar);
 
         //when
-        JoinResponseDto joinResponseDto = userService.회원가입(joinRequestDto);
-        System.out.println("joinResponseDto = " + joinResponseDto);
+        UserResponseDto userResponseDto = userService.회원가입(userRequestDto);
+        System.out.println("joinResponseDto = " + userResponseDto);
 
         //then
-        assertThat(joinResponseDto.getId()).isEqualTo(1L);
-        assertThat(joinResponseDto.getUsername()).isEqualTo("ssar");
+        assertThat(userResponseDto.getId()).isEqualTo(1L);
+        assertThat(userResponseDto.getUsername()).isEqualTo("ssar");
     }
 }

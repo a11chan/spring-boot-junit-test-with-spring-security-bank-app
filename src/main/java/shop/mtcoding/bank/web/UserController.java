@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import shop.mtcoding.bank.dto.ResponseDto;
-import shop.mtcoding.bank.dto.user.JoinRequestDto;
-import shop.mtcoding.bank.dto.user.JoinResponseDto;
+import shop.mtcoding.bank.dto.user.UserRequestDto;
+import shop.mtcoding.bank.dto.user.UserResponseDto;
 import shop.mtcoding.bank.service.UserService;
 
 import javax.validation.Valid;
@@ -24,12 +24,12 @@ public class UserController {
 
     @PostMapping("/join")
     public ResponseEntity<?> join(
-            @RequestBody @Valid JoinRequestDto joinRequestDto,
+            @RequestBody @Valid UserRequestDto userRequestDto,
             BindingResult bindingResult) {
 
-        JoinResponseDto joinResponseDto = userService.회원가입(joinRequestDto);
+        UserResponseDto userResponseDto = userService.회원가입(userRequestDto);
 
-        return new ResponseEntity<>(new ResponseDto(1, "회원가입 성공", joinResponseDto), HttpStatus.CREATED);
+        return new ResponseEntity<>(new ResponseDto(1, "회원가입 성공", userResponseDto), HttpStatus.CREATED);
     }
 }
 
