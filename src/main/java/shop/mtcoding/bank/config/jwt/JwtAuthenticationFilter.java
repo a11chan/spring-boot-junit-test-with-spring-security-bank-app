@@ -1,6 +1,8 @@
 package shop.mtcoding.bank.config.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,16 +24,19 @@ import static shop.mtcoding.bank.dto.user.UserResponseDto.*;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
     private final AuthenticationManager authenticationManager;
 
     public JwtAuthenticationFilter(final AuthenticationManager authenticationManager) {
         super(authenticationManager);
         this.authenticationManager = authenticationManager;
-        setFilterProcessesUrl("api/login");
+        setFilterProcessesUrl("/api/login");
     }
 
     @Override //Post /login 요청 시 동작
     public Authentication attemptAuthentication(final HttpServletRequest request, final HttpServletResponse response) throws AuthenticationException {
+        log.debug("디버그 : attemptAuthentication 호출됨");
 
         try {
             ObjectMapper om = new ObjectMapper();
@@ -53,6 +58,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override // 인증 성공 시 동작
     protected void successfulAuthentication(final HttpServletRequest request, final HttpServletResponse response, final FilterChain chain, final Authentication authResult) throws IOException, ServletException {
+        log.debug("디버그 : successfulAuthentication 호출됨");
+
         LoginUser loginUser = (LoginUser) authResult.getPrincipal();
         String jwtToken = JwtProcess.create(loginUser);
         response.addHeader(JwtVO.HEADER, jwtToken);

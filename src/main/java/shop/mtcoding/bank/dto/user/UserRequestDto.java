@@ -18,6 +18,7 @@ public class UserRequestDto {
 
     @Getter
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class LoginRequestDto {
 
         private String username;

@@ -4,13 +4,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import shop.mtcoding.bank.config.jwt.JwtAuthenticationFilter;
 import shop.mtcoding.bank.domain.user.UserEnum;
 import shop.mtcoding.bank.util.CustomResponseUtil;
 
@@ -22,9 +25,20 @@ public class SecurityConfig {
 
     @Bean //@Configuration이 있는 클래스에서만 작동, IoC 컨테이너에 등록
     public BCryptPasswordEncoder passwordEncoder() {
-        log.debug("디버그 : BCryptPasswordEncoder 빈 등록됨" );
+        log.debug("디버그 : BCryptPasswordEncoder 빈 등록됨");
 
         return new BCryptPasswordEncoder();
+    }
+
+    // JWT 필터 등록이 필요함
+    public class CustomSecurityFilterManager extends AbstractHttpConfigurer<CustomSecurityFilterManager, HttpSecurity> {
+        @Override
+        public void configure(final HttpSecurity builder) throws Exception {
+            // 강제 세션 로그인을 위한 AuthenticationManager 획득, 주입
+            AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
+            builder.addFilter(new JwtAuthenticationFilter(authenticationManager));
+            super.configure(builder);
+        }
     }
 
     // 2. JWT 필터 등록
@@ -43,15 +57,18 @@ public class SecurityConfig {
         http.formLogin().disable(); // <form> 형태의 로그인 미사용, react or API로 대체
         http.httpBasic().disable(); // 팝업창을 이용한 브라우저의 사용자 인증을 차단
 
+        //custom 필터 적용
+        http.apply(new CustomSecurityFilterManager());
+
         // Exception 가로채기
         http.exceptionHandling().authenticationEntryPoint((request, response, authException) -> {
-            CustomResponseUtil.unAuthentication(response,"로그인을 진행해주세요.");
+            CustomResponseUtil.unAuthentication(response, "로그인을 진행해주세요.");
         });
 
         //인가(권한) 관리
         http.authorizeRequests()
                 .antMatchers("/api/s/**").authenticated()
-                .antMatchers("/api/admin/**").hasRole(""+UserEnum.ADMIN) //최근 공식문서에 따르면 ROLE_ 생략 가능
+                .antMatchers("/api/admin/**").hasRole("" + UserEnum.ADMIN) //최근 공식문서에 따르면 ROLE_ 생략 가능
                 .anyRequest().permitAll();
 
         return http.build();
@@ -67,7 +84,7 @@ public class SecurityConfig {
         configuration.setAllowCredentials(true); //클라이언트의 쿠키 요청/응답 허용
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**",configuration); //모든 요청에 대해 위 단락에서 설정한 내용 적용
+        source.registerCorsConfiguration("/**", configuration); //모든 요청에 대해 위 단락에서 설정한 내용 적용
 
         return source;
     }

@@ -1,6 +1,6 @@
 package shop.mtcoding.bank.service;
 
-import lombok.*;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -9,10 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.user.UserRequestDto;
-import shop.mtcoding.bank.dto.user.UserResponseDto;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
 
 import java.util.Optional;
+
+import static shop.mtcoding.bank.dto.user.UserResponseDto.JoinResponseDto;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class UserService {
 
     // 서비스 계층 역할 선언:  Dto를 받고 Dto로 응답한다.
     @Transactional
-    public UserResponseDto 회원가입(UserRequestDto userRequestDto) {
+    public JoinResponseDto 회원가입(UserRequestDto userRequestDto) {
         // 1. 동일 유저네임 존재 검사 //Optional 참조변수에 접미사 -OP
         Optional<User> userOP = userRepository.findByUsername(userRequestDto.getUsername());
         if (userOP.isPresent()) throw new CustomApiException("동일한 username이 존재합니다.");
@@ -34,6 +35,6 @@ public class UserService {
         User userPS = userRepository.save(userRequestDto.toEntity(passwordEncoder));
 
         // 3. dto 응답
-        return new UserResponseDto(userPS);
+        return new JoinResponseDto(userPS);
     }
 }

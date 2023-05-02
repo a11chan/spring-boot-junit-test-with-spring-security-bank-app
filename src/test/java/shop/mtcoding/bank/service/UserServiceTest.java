@@ -11,13 +11,13 @@ import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.user.UserRequestDto;
-import shop.mtcoding.bank.dto.user.UserResponseDto;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static shop.mtcoding.bank.dto.user.UserResponseDto.JoinResponseDto;
 
 @ExtendWith(value = MockitoExtension.class) // Spring Context 내 Bean이 없는 환경
 public class UserServiceTest extends DummyObject {
@@ -52,11 +52,11 @@ public class UserServiceTest extends DummyObject {
         when(userRepository.save(any())).thenReturn(ssar);
 
         //when
-        UserResponseDto userResponseDto = userService.회원가입(userRequestDto);
-        System.out.println("joinResponseDto = " + userResponseDto);
+        JoinResponseDto joinResponseDto = userService.회원가입(userRequestDto);
+        System.out.println("joinResponseDto = " + joinResponseDto);
 
         //then
-        assertThat(userResponseDto.getId()).isEqualTo(1L);
-        assertThat(userResponseDto.getUsername()).isEqualTo("ssar");
+        assertThat(joinResponseDto.getId()).isEqualTo(1L);
+        assertThat(joinResponseDto.getUsername()).isEqualTo("ssar");
     }
 }
