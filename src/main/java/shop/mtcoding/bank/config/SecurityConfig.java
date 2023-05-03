@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -14,6 +15,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import shop.mtcoding.bank.config.jwt.JwtAuthenticationFilter;
+import shop.mtcoding.bank.config.jwt.JwtAuthorizationFilter;
 import shop.mtcoding.bank.domain.user.UserEnum;
 import shop.mtcoding.bank.util.CustomResponseUtil;
 
@@ -31,12 +33,13 @@ public class SecurityConfig {
     }
 
     // JWT 필터 등록이 필요함
-    public class CustomSecurityFilterManager extends AbstractHttpConfigurer<CustomSecurityFilterManager, HttpSecurity> {
+    public static class CustomSecurityFilterManager extends AbstractHttpConfigurer<CustomSecurityFilterManager, HttpSecurity> {
         @Override
         public void configure(final HttpSecurity builder) throws Exception {
             // 강제 세션 로그인을 위한 AuthenticationManager 획득, 주입
             AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
             builder.addFilter(new JwtAuthenticationFilter(authenticationManager));
+            builder.addFilter(new JwtAuthorizationFilter(authenticationManager));
             super.configure(builder);
         }
     }
@@ -60,14 +63,15 @@ public class SecurityConfig {
         //custom 필터 적용
         http.apply(new CustomSecurityFilterManager());
 
-        // Exception 가로채기
-        http.exceptionHandling().authenticationEntryPoint((request, response, authException) -> {
-            CustomResponseUtil.unAuthentication(response, "로그인을 진행해주세요.");
-        });
+        //인증 실패 Exception 가로채기
+        http.exceptionHandling().authenticationEntryPoint((request, response, authException) -> CustomResponseUtil.fail(response, "로그인 실패", HttpStatus.UNAUTHORIZED));
+
+        //권한 없음
+        http.exceptionHandling().accessDeniedHandler((request, response, e) -> CustomResponseUtil.fail(response, "권한 없음", HttpStatus.FORBIDDEN));
 
         //인가(권한) 관리
         http.authorizeRequests()
-                .antMatchers("/api/s/**").authenticated()
+                .antMatchers("/api/s/**").authenticated() //인증 성공 시 404
                 .antMatchers("/api/admin/**").hasRole("" + UserEnum.ADMIN) //최근 공식문서에 따르면 ROLE_ 생략 가능
                 .anyRequest().permitAll();
 

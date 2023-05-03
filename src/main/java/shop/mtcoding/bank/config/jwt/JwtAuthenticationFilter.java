@@ -3,6 +3,7 @@ package shop.mtcoding.bank.config.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -45,9 +46,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                     loginRequestDto.getUsername(), loginRequestDto.getPassword());
             // 강제 로그인 진행, JWT를 쓴다고 해도 Controller 계층에 진입 시
             // 편리한 시큐리티의 인증, 권한 확인 기능을 사용하기 위해 세션을 만든다.
-            // 이 세션의 유효기간은 request, response 하면 끝
+            // 하지만 이 세션의 유효기간은 request, response 하면 끝남
 
-            return authenticationManager.authenticate(authenticationToken); // UserDetailsService의 loadUserByUsername 호출
+            return authenticationManager.authenticate(authenticationToken); // 이 return문이 UserDetailsService의 loadUserByUsername 호출 -> 세션 생성됨
         } catch (Exception e) {
             // unsuccessfulAuthentication() 호출함
             throw new InternalAuthenticationServiceException(e.getMessage());
@@ -56,7 +57,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override //로그인 실패 시 동작
     protected void unsuccessfulAuthentication(final HttpServletRequest request, final HttpServletResponse response, final AuthenticationException failed) throws IOException, ServletException {
-        CustomResponseUtil.unAuthentication(response, "로그인 실패");
+        CustomResponseUtil.fail(response, "로그인 실패", HttpStatus.UNAUTHORIZED);
     }
 
     @Override // 인증 성공 시 동작
