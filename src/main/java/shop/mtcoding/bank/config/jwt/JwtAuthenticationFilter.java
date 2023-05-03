@@ -16,11 +16,10 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 
-import static shop.mtcoding.bank.dto.user.UserRequestDto.*;
-import static shop.mtcoding.bank.dto.user.UserResponseDto.*;
+import static shop.mtcoding.bank.dto.user.UserRequestDto.LoginRequestDto;
+import static shop.mtcoding.bank.dto.user.UserResponseDto.LoginResponseDto;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -50,10 +49,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
             return authenticationManager.authenticate(authenticationToken); // UserDetailsService의 loadUserByUsername 호출
         } catch (Exception e) {
-            // ControllerAdvice를 거치기 전 예외처리 됨
-            // SecurityConfig.java -> authenticationEntryPoint에 걸림
+            // unsuccessfulAuthentication() 호출함
             throw new InternalAuthenticationServiceException(e.getMessage());
         }
+    }
+
+    @Override //로그인 실패 시 동작
+    protected void unsuccessfulAuthentication(final HttpServletRequest request, final HttpServletResponse response, final AuthenticationException failed) throws IOException, ServletException {
+        CustomResponseUtil.unAuthentication(response, "로그인 실패");
     }
 
     @Override // 인증 성공 시 동작
