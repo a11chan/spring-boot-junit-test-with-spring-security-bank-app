@@ -23,7 +23,7 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 20)
+    @Column(unique = true, nullable = false, length = 4)
     private Long number; // 계좌 번호
 
     @Column(nullable = false, length = 4)
