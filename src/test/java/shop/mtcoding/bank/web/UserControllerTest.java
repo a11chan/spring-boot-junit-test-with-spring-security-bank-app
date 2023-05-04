@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.user.UserRequestDto;
@@ -17,6 +18,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
 public class UserControllerTest extends DummyObject {
@@ -32,7 +34,7 @@ public class UserControllerTest extends DummyObject {
 
     @BeforeEach
     void setUp() {
-        dataSetting();
+        userRepository.save(newUser("ssar", "쌀"));
     }
 
     @Test
@@ -79,9 +81,5 @@ public class UserControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isBadRequest());
-    }
-
-    private void dataSetting() {
-        userRepository.save(newUser("ssar", "쌀"));
     }
 }
