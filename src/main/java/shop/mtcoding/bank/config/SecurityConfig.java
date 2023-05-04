@@ -63,10 +63,10 @@ public class SecurityConfig {
         //custom 필터 적용
         http.apply(new CustomSecurityFilterManager());
 
-        //인증 실패 Exception 가로채기
+        //인증 실패 Exception 처리
         http.exceptionHandling().authenticationEntryPoint((request, response, authException) -> CustomResponseUtil.fail(response, "로그인 실패", HttpStatus.UNAUTHORIZED));
 
-        //권한 없음
+        //권한 없음 Exception 처리
         http.exceptionHandling().accessDeniedHandler((request, response, e) -> CustomResponseUtil.fail(response, "권한 없음", HttpStatus.FORBIDDEN));
 
         //인가(권한) 관리

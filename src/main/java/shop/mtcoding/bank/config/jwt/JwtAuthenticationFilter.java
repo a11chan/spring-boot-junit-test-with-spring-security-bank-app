@@ -34,7 +34,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         setFilterProcessesUrl("/api/login");
     }
 
-    @Override //Post /login 요청 시 동작
+    //Post /login 요청 시 동작
+    @Override
     public Authentication attemptAuthentication(final HttpServletRequest request, final HttpServletResponse response) throws AuthenticationException {
         log.debug("디버그 : attemptAuthentication 호출됨");
 
@@ -44,10 +45,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                     loginRequestDto.getUsername(), loginRequestDto.getPassword());
+
             // 강제 로그인 진행, JWT를 쓴다고 해도 Controller 계층에 진입 시
             // 편리한 시큐리티의 인증, 권한 확인 기능을 사용하기 위해 세션을 만든다.
             // 하지만 이 세션의 유효기간은 request, response 하면 끝남
-
             return authenticationManager.authenticate(authenticationToken); // 이 return문이 UserDetailsService의 loadUserByUsername 호출 -> 세션 생성됨
         } catch (Exception e) {
             // unsuccessfulAuthentication() 호출함

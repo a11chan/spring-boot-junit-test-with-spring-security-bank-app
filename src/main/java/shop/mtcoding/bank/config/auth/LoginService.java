@@ -24,6 +24,9 @@ public class LoginService implements UserDetailsService {
         User userPS = userRepository.findByUsername(username).orElseThrow(
                 () -> new InternalAuthenticationServiceException("인증 실패")
         );
-        return new LoginUser(userPS); // 로그인 성공 시 만들어질 세션
+
+        // 로그인 성공 시 Authentication 객체에 담겨 서버 Session 내 SecurityContextHolder에 저장
+        // 이후 JWT 토큰 생성 -> response 헤더에 전달됨
+        return new LoginUser(userPS);
     }
 }
