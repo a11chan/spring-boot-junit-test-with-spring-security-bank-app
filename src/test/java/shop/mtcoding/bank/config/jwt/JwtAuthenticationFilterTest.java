@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.user.UserRequestDto.LoginRequestDto;
@@ -21,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Transactional
 @ActiveProfiles(value = "test")
 //Mockito 환경(가상 환경)에서 MockMvc @Autowired 적용 가능하게 함
 @AutoConfigureMockMvc
@@ -66,13 +68,18 @@ public class JwtAuthenticationFilterTest extends DummyObject {
     @Test
     void unsuccessfulAuthentication_test() throws Exception {
         //given
-
+        LoginRequestDto loginRequestDto = new LoginRequestDto("ssar","12345");
+        String requestBody = om.writerWithDefaultPrettyPrinter().writeValueAsString(loginRequestDto);
+        System.out.println("requestBody = " + requestBody);
 
         //when
-
+        ResultActions resultActions = mvc.perform(post("/api/login").contentType(MediaType.APPLICATION_JSON).content(requestBody));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        String jwtToken = resultActions.andReturn().getResponse().getHeader(JwtVO.HEADER);
+        System.out.println("responseBody = " + responseBody);
+        System.out.println("jwtToken = " + jwtToken);
 
         //then
-
-
+        resultActions.andExpect(status().isUnauthorized());
     }
 }
