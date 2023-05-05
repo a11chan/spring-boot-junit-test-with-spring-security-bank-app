@@ -1,7 +1,5 @@
 package shop.mtcoding.bank.service;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,10 +7,10 @@ import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.account.AccountRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
+import shop.mtcoding.bank.dto.account.AccountSaveRequestDto;
+import shop.mtcoding.bank.dto.account.AccountSaveResponseDto;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
 
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotNull;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -38,42 +36,6 @@ public class AccountService {
 
         // 결과 DTO로 응답
         return new AccountSaveResponseDto(accountPS);
-    }
-
-    @Getter
-    public static class AccountSaveResponseDto {
-
-        private final Long id;
-        private final Long number;
-        private final Long balance;
-
-        public AccountSaveResponseDto(final Account account) {
-            this.id = account.getId();
-            this.number = account.getNumber();
-            this.balance = account.getBalance();
-        }
-    }
-
-    @Getter
-    @AllArgsConstructor
-    public static class AccountSaveRequestDto {
-
-        @NotNull
-        @Digits(integer = 4, fraction = 4)
-        private Long number;
-
-        @NotNull
-        @Digits(integer = 4, fraction = 4)
-        private Long password;
-
-        public Account toEntity(User user) {
-            return Account.builder()
-                    .number(number)
-                    .password(password)
-                    .balance(1000L)
-                    .user(user)
-                    .build();
-        }
     }
 
 }
