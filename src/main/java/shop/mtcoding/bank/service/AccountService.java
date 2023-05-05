@@ -54,7 +54,6 @@ public class AccountService {
         }
     }
 
-
     @Getter
     @AllArgsConstructor
     public static class AccountSaveRequestDto {
