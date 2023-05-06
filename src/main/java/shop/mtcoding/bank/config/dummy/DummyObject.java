@@ -36,6 +36,15 @@ public class DummyObject {
                 .build();
     }
 
+    protected Account newAccount(Long number, User user) {
+        return Account.builder()
+                .number(number)
+                .password(1234L)
+                .balance(1000L)
+                .user(user)
+                .build();
+    }
+
     protected Account newMockAccount(Long id, Long number, Long balance, User user) {
         return Account.builder()
                 .id(id)
