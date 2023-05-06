@@ -62,7 +62,8 @@ public class Account {
     }
 
     public void checkOwner(Long userId) {
-        if (user.getId() != userId) {
+//      System.out.println("user.getUsername() = " + user.getUsername()); //LazyLoding TEST
+        if (!user.getId().equals(userId)) { //Lazy 로딩이어도 id를 조회할 때는 select문 실행 안 됨
             throw new CustomApiException("계좌 소유자가 아닙니다.");
         }
     }
