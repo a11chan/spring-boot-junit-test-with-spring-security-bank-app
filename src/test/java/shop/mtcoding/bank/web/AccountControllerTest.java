@@ -16,6 +16,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import shop.mtcoding.bank.config.dummy.DummyObject;
+import shop.mtcoding.bank.domain.account.Account;
+import shop.mtcoding.bank.domain.account.AccountRepository;
+import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountSaveRequestDto;
 
@@ -36,9 +39,13 @@ public class AccountControllerTest extends DummyObject {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AccountRepository accountRepository;
+
     @BeforeEach
     void setUp() {
         userRepository.save(newUser("ssar", "쌀"));
+        userRepository.save(newUser("cos", "코스"));
     }
 
     //setupBefore = TestExecutionEvent.TEST_EXECUTION : @Test 대상 메서드 실행 전에 수행, @BeforeEach보다는 나중에 실행
@@ -57,5 +64,24 @@ public class AccountControllerTest extends DummyObject {
 //        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
 //        System.out.println("responseBody = " + responseBody);
         resultActions.andExpect(status().isCreated());
+    }
+
+    @WithUserDetails(value = "cos", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    void findUserAccount_Test() throws Exception {
+        //given
+        User cos = userRepository.findByUsername("cos").get();
+        Account cosAccount1 = newMockAccount(1L, 2222L, 1000L, cos);
+        Account cosAccount2 = newMockAccount(2L, 3333L, 1000L, cos);
+        accountRepository.save(cosAccount1);
+        accountRepository.save(cosAccount2);
+
+        //when
+        ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.get("/api/s/account/login-user"));
+
+        //then
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+        resultActions.andExpect(status().isOk());
     }
 }
