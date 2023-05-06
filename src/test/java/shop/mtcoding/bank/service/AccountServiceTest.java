@@ -14,9 +14,11 @@ import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountSaveRequestDto;
 import shop.mtcoding.bank.dto.account.AccountSaveResponseDto;
+import shop.mtcoding.bank.handler.ex.CustomApiException;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -60,5 +62,24 @@ public class AccountServiceTest extends DummyObject {
 
         //then
         assertThat(accountSaveResponseDto.getNumber()).isEqualTo(1111L);
+    }
+
+    @Test
+    void 계좌삭제_test() throws Exception {
+        //given
+        Long number = 1111L;
+        Long userId = 2L; //삭제 시 반환값이 없으므로 유저 아이디가 다를 경우 검증
+
+        //stub (가정)
+        User ssar = newMockUser(1L, "ssar", "쌀");
+        Account ssarAccount = newMockAccount(1L, 1111L, 1000L, ssar);
+        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(ssarAccount));
+
+        //when
+
+        //then
+        assertThatThrownBy(() -> {
+            accountService.계좌삭제(ssarAccount.getNumber(), userId);
+        }).isInstanceOf(CustomApiException.class);
     }
 }
