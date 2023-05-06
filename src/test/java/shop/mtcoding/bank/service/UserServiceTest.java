@@ -16,6 +16,7 @@ import shop.mtcoding.bank.dto.user.UserRequestDto;
 import shop.mtcoding.bank.service.AccountService.AccountListResponseDto;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,23 +51,19 @@ public class UserServiceTest extends DummyObject {
         //given
         Long userId = 1L;
 
-        User ssar = newMockUser(userId, "ssar", "쌀");
-        Account ssarAccount1 = newMockAccount(userId, 1111L, 1000L, ssar);
-        Account ssarAccount2 = newMockAccount(userId, 1234L, 1000L, ssar);
-
-        List<Account> accountList = new ArrayList<>();
-        accountList.add(ssarAccount1);
-        accountList.add(ssarAccount2);
-
-        when(userRepository.findById(any())).thenReturn(Optional.of(ssar));
+        // stub
+        User ssar = newMockUser(1L, "ssar", "쌀");
+        Account ssarAccount1 = newMockAccount(1L, 1111L, 1000L, ssar);
+        Account ssarAccount2 = newMockAccount(2L, 1234L, 1000L, ssar);
+        List<Account> accountList = Arrays.asList(ssarAccount1, ssarAccount2);
         when(accountRepository.findByUser_id(any())).thenReturn(accountList);
 
         //when
         AccountListResponseDto accountListResponseDto = accountService.계좌목록보기_유저별(userId);
 
         //then
-        assertThat(accountListResponseDto.getAccounts().size()).isEqualTo(2);
         assertThat(accountListResponseDto.getFullname()).isEqualTo("쌀");
+        assertThat(accountListResponseDto.getAccounts().size()).isEqualTo(2);
     }
 
     @Test
