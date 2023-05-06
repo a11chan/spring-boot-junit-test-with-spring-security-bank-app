@@ -8,10 +8,15 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import shop.mtcoding.bank.config.dummy.DummyObject;
+import shop.mtcoding.bank.domain.account.Account;
+import shop.mtcoding.bank.domain.account.AccountRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.user.UserRequestDto;
+import shop.mtcoding.bank.service.AccountService.AccountListResponseDto;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,14 +30,44 @@ public class UserServiceTest extends DummyObject {
     @InjectMocks
     private UserService userService;
 
+    @InjectMocks
+    private AccountService accountService;
+
     // @InjectMocks 객체가 의존 가능하도록 모의 객체를 생성함
     // @InjectMocks 객체에서 사용되는 method stub 정의 필요, 이하 코드 참고
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private AccountRepository accountRepository;
+
 //    @Spy // @InjectMocks객체에 실제 객체 주입
     @Spy
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Test
+    void 계좌목록보기_유저별_test() {
+        //given
+        Long userId = 1L;
+
+        User ssar = newMockUser(userId, "ssar", "쌀");
+        Account ssarAccount1 = newMockAccount(userId, 1111L, 1000L, ssar);
+        Account ssarAccount2 = newMockAccount(userId, 1234L, 1000L, ssar);
+
+        List<Account> accountList = new ArrayList<>();
+        accountList.add(ssarAccount1);
+        accountList.add(ssarAccount2);
+
+        when(userRepository.findById(any())).thenReturn(Optional.of(ssar));
+        when(accountRepository.findByUser_id(any())).thenReturn(accountList);
+
+        //when
+        AccountListResponseDto accountListResponseDto = accountService.계좌목록보기_유저별(userId);
+
+        //then
+        assertThat(accountListResponseDto.getAccounts().size()).isEqualTo(2);
+        assertThat(accountListResponseDto.getFullname()).isEqualTo("쌀");
+    }
 
     @Test
     void 회원가입_test() {
