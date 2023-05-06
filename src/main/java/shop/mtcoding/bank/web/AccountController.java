@@ -11,7 +11,7 @@ import shop.mtcoding.bank.dto.ResponseDto;
 import shop.mtcoding.bank.dto.account.AccountSaveRequestDto;
 import shop.mtcoding.bank.dto.account.AccountSaveResponseDto;
 import shop.mtcoding.bank.service.AccountService;
-import shop.mtcoding.bank.service.AccountService.AccountListResponseDto;
+import shop.mtcoding.bank.dto.account.AccountListResponseDto;
 
 import javax.validation.Valid;
 
@@ -48,5 +48,11 @@ public class AccountController {
         AccountListResponseDto accountListResponseDto = accountService.계좌목록보기_유저별(loginUser.getUser().getId());
 
         return new ResponseEntity<>(new ResponseDto<>(1, "계좌 목록 보기_유저별 성공", accountListResponseDto), HttpStatus.OK);
+    }
+
+    @DeleteMapping(value = "/s/account/{number}")
+    public ResponseEntity<?> deleteAccount(@PathVariable Long number, @AuthenticationPrincipal LoginUser loginuser) {
+        accountService.계좌삭제(number,loginuser.getUser().getId());
+        return new ResponseEntity<>(new ResponseDto<>(1, "계좌 삭제 완료", null), HttpStatus.OK);
     }
 }

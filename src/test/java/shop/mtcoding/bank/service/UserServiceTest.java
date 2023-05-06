@@ -12,15 +12,15 @@ import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.account.AccountRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
+import shop.mtcoding.bank.dto.account.AccountListResponseDto;
 import shop.mtcoding.bank.dto.user.UserRequestDto;
-import shop.mtcoding.bank.service.AccountService.AccountListResponseDto;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static shop.mtcoding.bank.dto.user.UserResponseDto.JoinResponseDto;
@@ -42,7 +42,7 @@ public class UserServiceTest extends DummyObject {
     @Mock
     private AccountRepository accountRepository;
 
-//    @Spy // @InjectMocks객체에 실제 객체 주입
+    //    @Spy // @InjectMocks객체에 실제 객체 주입
     @Spy
     private BCryptPasswordEncoder passwordEncoder;
 
@@ -90,5 +90,24 @@ public class UserServiceTest extends DummyObject {
         //then
         assertThat(joinResponseDto.getId()).isEqualTo(1L);
         assertThat(joinResponseDto.getUsername()).isEqualTo("ssar");
+    }
+
+    @Test
+    void 계좌삭제_test() throws Exception {
+        //given
+        Long number = 1111L;
+        Long userId = 2L; //삭제 시 반환값이 없으므로 유저 아이디가 다를 경우 검증
+
+        //stub (가정)
+        User ssar = newMockUser(1L, "ssar", "쌀");
+        Account ssarAccount = newMockAccount(1L, 1111L, 1000L, ssar);
+        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(ssarAccount));
+
+        //when
+
+        //then
+        assertThatThrownBy(() -> {
+            accountService.계좌삭제(ssarAccount.getNumber(), userId);
+        });
     }
 }
