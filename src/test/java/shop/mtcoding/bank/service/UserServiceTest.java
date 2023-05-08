@@ -8,15 +8,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import shop.mtcoding.bank.config.dummy.DummyObject;
-import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.account.AccountRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
-import shop.mtcoding.bank.dto.account.AccountListResponseDto;
 import shop.mtcoding.bank.dto.user.UserRequestDto;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,26 +40,6 @@ public class UserServiceTest extends DummyObject {
     //    @Spy // @InjectMocks객체에 실제 객체 주입
     @Spy
     private BCryptPasswordEncoder passwordEncoder;
-
-    @Test
-    void 계좌목록보기_유저별_test() {
-        //given
-        Long userId = 1L;
-
-        // stub
-        User ssar = newMockUser(1L, "ssar", "쌀");
-        Account ssarAccount1 = newMockAccount(1L, 1111L, 1000L, ssar);
-        Account ssarAccount2 = newMockAccount(2L, 1234L, 1000L, ssar);
-        List<Account> accountList = Arrays.asList(ssarAccount1, ssarAccount2);
-        when(accountRepository.findByUser_id(any())).thenReturn(accountList);
-
-        //when
-        AccountListResponseDto accountListResponseDto = accountService.계좌목록보기_유저별(userId);
-
-        //then
-        assertThat(accountListResponseDto.getFullname()).isEqualTo("쌀");
-        assertThat(accountListResponseDto.getAccounts().size()).isEqualTo(2);
-    }
 
     @Test
     void 회원가입_test() {
