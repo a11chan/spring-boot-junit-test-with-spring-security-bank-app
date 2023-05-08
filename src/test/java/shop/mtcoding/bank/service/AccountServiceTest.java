@@ -1,6 +1,7 @@
 package shop.mtcoding.bank.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,10 +13,13 @@ import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.account.AccountRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
+import shop.mtcoding.bank.dto.account.AccountListResponseDto;
 import shop.mtcoding.bank.dto.account.AccountSaveRequestDto;
 import shop.mtcoding.bank.dto.account.AccountSaveResponseDto;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -62,6 +66,28 @@ public class AccountServiceTest extends DummyObject {
 
         //then
         assertThat(accountSaveResponseDto.getNumber()).isEqualTo(1111L);
+    }
+
+    @Test
+    void 계좌목록보기_유저별_test() {
+        // given
+        Long userId = 1L;
+
+        // stub
+        User ssar = newMockUser(1L, "ssar", "쌀");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(ssar));
+
+        Account ssarAccount1 = newMockAccount(1L, 1111L, 1000L, ssar);
+        Account ssarAccount2 = newMockAccount(2L, 1234L, 1000L, ssar);
+        List<Account> accountList = Arrays.asList(ssarAccount1, ssarAccount2);
+        when(accountRepository.findByUser_id(any())).thenReturn(accountList);
+
+        //when
+        AccountListResponseDto accountListResponseDto = accountService.계좌목록보기_유저별(userId);
+
+        //then
+        Assertions.assertThat(accountListResponseDto.getFullname()).isEqualTo("쌀");
+        Assertions.assertThat(accountListResponseDto.getAccounts().size()).isEqualTo(2);
     }
 
     @Test

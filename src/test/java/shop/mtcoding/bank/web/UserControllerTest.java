@@ -7,18 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.annotation.Transactional;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.user.UserRequestDto;
+
+import javax.persistence.EntityManager;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Transactional
+@Sql("classpath:db/teardown.sql")
+@ActiveProfiles(value = "test")
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
 public class UserControllerTest extends DummyObject {
@@ -32,9 +36,13 @@ public class UserControllerTest extends DummyObject {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EntityManager em;
+
     @BeforeEach
     void setUp() {
         userRepository.save(newUser("ssar", "쌀"));
+        em.clear();
     }
 
     @Test
