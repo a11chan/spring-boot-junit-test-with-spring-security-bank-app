@@ -1,9 +1,5 @@
 package shop.mtcoding.bank.service;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,16 +10,9 @@ import shop.mtcoding.bank.domain.transaction.TransactionEnum;
 import shop.mtcoding.bank.domain.transaction.TransactionRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
-import shop.mtcoding.bank.dto.account.AccountListResponseDto;
-import shop.mtcoding.bank.dto.account.AccountSaveRequestDto;
-import shop.mtcoding.bank.dto.account.AccountSaveResponseDto;
+import shop.mtcoding.bank.dto.account.*;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
-import shop.mtcoding.bank.util.CustomDateUtil;
 
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import java.util.List;
 import java.util.Optional;
 
@@ -104,66 +93,7 @@ public class AccountService {
                 .build();
 
         Transaction txPS = transactionRepository.save(tx);
+
         return new AccountDepositResponseDto(depositAccountPS, txPS);
-    }
-
-    @Getter
-    public static class AccountDepositResponseDto {
-
-        private final Long id; // 계좌 ID
-        private final Long number; // 계좌번호
-        private final TransactionDto transactionDto; // 거래내역
-
-        public AccountDepositResponseDto(final Account account, final Transaction transaction) {
-            this.id = account.getId();
-            this.number = account.getNumber();
-            this.transactionDto = new TransactionDto(transaction);
-        }
-
-        @Getter
-        public class TransactionDto {
-
-            private final Long id;
-            private final String gubun;
-            private final String sender;
-            private final String receiver;
-            private final Long amount;
-
-            @JsonIgnore // 클라이언트에게 전달 안 함, 서비스 테스트 용
-            private final Long depositAccountBalance;
-            private final String tel;
-            private final String createdAt;
-
-            public TransactionDto(final Transaction transaction) {
-                this.id = transaction.getId();
-                this.gubun = transaction.getGubun().getValue();
-                this.sender = transaction.getSender();
-                this.receiver = transaction.getReceiver();
-                this.amount = transaction.getAmount();
-                this.depositAccountBalance = transaction.getDepositAccountBalance();
-                this.tel = transaction.getTel();
-                this.createdAt = CustomDateUtil.toStringFormat(transaction.getCreatedAt());
-            }
-        }
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class AccountDepositRequestDto {
-        @NotNull
-        @Digits(integer = 4, fraction = 4)
-        private Long number;
-
-        @NotNull
-        private Long amount;
-
-        @NotEmpty
-        @Pattern(regexp = "^(DEPOSIT)$")
-        private String gubun;
-
-        @NotEmpty
-        @Pattern(regexp = "^[0-9]{11}")
-        private String tel;
     }
 }
