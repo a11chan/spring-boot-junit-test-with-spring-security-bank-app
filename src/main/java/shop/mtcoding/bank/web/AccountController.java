@@ -8,10 +8,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import shop.mtcoding.bank.config.auth.LoginUser;
 import shop.mtcoding.bank.dto.ResponseDto;
+import shop.mtcoding.bank.dto.account.AccountListResponseDto;
 import shop.mtcoding.bank.dto.account.AccountSaveRequestDto;
 import shop.mtcoding.bank.dto.account.AccountSaveResponseDto;
 import shop.mtcoding.bank.service.AccountService;
-import shop.mtcoding.bank.dto.account.AccountListResponseDto;
+import shop.mtcoding.bank.service.AccountService.AccountDepositRequestDto;
+import shop.mtcoding.bank.service.AccountService.AccountDepositResponseDto;
 
 import javax.validation.Valid;
 
@@ -54,5 +56,12 @@ public class AccountController {
     public ResponseEntity<?> deleteAccount(@PathVariable Long number, @AuthenticationPrincipal LoginUser loginuser) {
         accountService.계좌삭제(number,loginuser.getUser().getId());
         return new ResponseEntity<>(new ResponseDto<>(1, "계좌 삭제 완료", null), HttpStatus.OK);
+    }
+
+    @PostMapping("/account/deposit")
+    public ResponseEntity<?> depositAccount(@RequestBody @Valid AccountDepositRequestDto accountDepositRequestDto, BindingResult bindingResult) {
+        AccountDepositResponseDto accountDepositResponseDto = accountService.계좌입금(accountDepositRequestDto);
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "계좌 입금 완료", accountDepositResponseDto), HttpStatus.CREATED);
     }
 }

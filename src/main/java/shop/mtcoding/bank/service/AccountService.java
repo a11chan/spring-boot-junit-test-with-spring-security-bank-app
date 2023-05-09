@@ -1,7 +1,9 @@
 package shop.mtcoding.bank.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,11 +110,11 @@ public class AccountService {
     @Getter
     public static class AccountDepositResponseDto {
 
-        private Long id; // 계좌 ID
-        private Long number; // 계좌번호
-        private TransactionDto transactionDto; // 거래내역
+        private final Long id; // 계좌 ID
+        private final Long number; // 계좌번호
+        private final TransactionDto transactionDto; // 거래내역
 
-        public AccountDepositResponseDto(Account account, Transaction transaction) {
+        public AccountDepositResponseDto(final Account account, final Transaction transaction) {
             this.id = account.getId();
             this.number = account.getNumber();
             this.transactionDto = new TransactionDto(transaction);
@@ -121,16 +123,16 @@ public class AccountService {
         @Getter
         public class TransactionDto {
 
-            private Long id;
-            private String gubun;
-            private String sender;
-            private String receiver;
-            private Long amount;
+            private final Long id;
+            private final String gubun;
+            private final String sender;
+            private final String receiver;
+            private final Long amount;
 
             @JsonIgnore // 클라이언트에게 전달 안 함, 서비스 테스트 용
-            private Long depositAccountBalance;
-            private String tel;
-            private String createdAt;
+            private final Long depositAccountBalance;
+            private final String tel;
+            private final String createdAt;
 
             public TransactionDto(final Transaction transaction) {
                 this.id = transaction.getId();
@@ -146,6 +148,8 @@ public class AccountService {
     }
 
     @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class AccountDepositRequestDto {
         @NotNull
         @Digits(integer = 4, fraction = 4)
@@ -161,12 +165,5 @@ public class AccountService {
         @NotEmpty
         @Pattern(regexp = "^[0-9]{11}")
         private String tel;
-
-        public AccountDepositRequestDto(final Long number, final Long amount, final String gubun, final String tel) {
-            this.number = number;
-            this.amount = amount;
-            this.gubun = gubun;
-            this.tel = tel;
-        }
     }
 }
