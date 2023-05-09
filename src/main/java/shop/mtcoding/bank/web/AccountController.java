@@ -8,12 +8,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import shop.mtcoding.bank.config.auth.LoginUser;
 import shop.mtcoding.bank.dto.ResponseDto;
-import shop.mtcoding.bank.dto.account.AccountListResponseDto;
-import shop.mtcoding.bank.dto.account.AccountSaveRequestDto;
-import shop.mtcoding.bank.dto.account.AccountSaveResponseDto;
+import shop.mtcoding.bank.dto.account.*;
 import shop.mtcoding.bank.service.AccountService;
-import shop.mtcoding.bank.service.AccountService.AccountDepositRequestDto;
-import shop.mtcoding.bank.service.AccountService.AccountDepositResponseDto;
 
 import javax.validation.Valid;
 
