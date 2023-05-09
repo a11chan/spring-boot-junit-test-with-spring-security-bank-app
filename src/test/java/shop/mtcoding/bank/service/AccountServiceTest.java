@@ -11,11 +11,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.account.AccountRepository;
+import shop.mtcoding.bank.domain.transaction.Transaction;
+import shop.mtcoding.bank.domain.transaction.TransactionRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
-import shop.mtcoding.bank.dto.account.AccountListResponseDto;
-import shop.mtcoding.bank.dto.account.AccountSaveRequestDto;
-import shop.mtcoding.bank.dto.account.AccountSaveResponseDto;
+import shop.mtcoding.bank.dto.account.*;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
 
 import java.util.Arrays;
@@ -38,6 +38,9 @@ public class AccountServiceTest extends DummyObject {
 
     @Mock
     private AccountRepository accountRepository;
+
+    @Mock
+    private TransactionRepository transactionRepository;
 
     @Spy //실제 객체를 @InjectMock에 주입
     private ObjectMapper om;
@@ -107,5 +110,33 @@ public class AccountServiceTest extends DummyObject {
         assertThatThrownBy(() -> {
             accountService.계좌삭제(ssarAccount.getNumber(), userId);
         }).isInstanceOf(CustomApiException.class);
+    }
+
+    // Account에 잔액 증가 확인
+    // Tx이력에 잔액 증가 확인
+    @Test
+    void 계좌입금_test() throws Exception {
+        //given
+        //requestDto
+        AccountDepositRequestDto accountDepositRequestDto = new AccountDepositRequestDto(1111L, 100L, "DEPOSIT", "01012345678");
+
+        //stub1
+        User ssar = newMockUser(1L, "ssar", "쌀");
+        Account ssarAccount1 = newMockAccount(1L, 1111L, 1000L, ssar);
+        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(ssarAccount1));
+
+        //stub2 (스텁이 진행될 때마다 연관 객체는 새로 만들어 주입하기? - service 내부 로직 때문에 중복 처리 가능성 있음)
+        Account ssarAccount2 = newMockAccount(1L, 1111L, 2000L, ssar);
+        Transaction ssarTx = newMockDepositTransaction(1L, ssarAccount2);
+        when(transactionRepository.save(any())).thenReturn(ssarTx);
+        //결과를 thenReturn으로 결정해버리는데 다른 방법으로 검증해야 하지 않을까?
+
+        //when
+        AccountDepositResponseDto depositResponseDto = accountService.계좌입금(accountDepositRequestDto);
+
+        //then
+        assertThat(ssarAccount1.getBalance()).isEqualTo(1100L);
+        assertThat(ssarAccount2.getBalance()).isEqualTo(2100L);
+        assertThat(depositResponseDto.getTransactionDto().getDepositAccountBalance()).isEqualTo(2100L);
     }
 }
