@@ -1,5 +1,7 @@
 package shop.mtcoding.bank.service;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +15,10 @@ import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.*;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
 
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,11 +87,11 @@ public class AccountService {
 
         //거래내역 기록
         Transaction tx = Transaction.builder()
-                .withdrawAccount(null)
                 .depositAccount(depositAccountPS)
-                .depositAccountBalance(depositAccountPS.getBalance())
+                .withdrawAccount(null)
                 .withdrawAccountBalance(null)
-                .amount(accountDepositRequestDto.getAmount())
+                .depositAccountBalance(depositAccountPS.getBalance())
+                .txAmount(accountDepositRequestDto.getAmount())
                 .gubun(TransactionEnum.DEPOSIT)
                 .sender("ATM")
                 .receiver(accountDepositRequestDto.getNumber() + "")
@@ -95,5 +101,57 @@ public class AccountService {
         Transaction txPS = transactionRepository.save(tx);
 
         return new AccountDepositResponseDto(depositAccountPS, txPS);
+    }
+
+    @Transactional
+    public AccountWithdrawResponseDto 계좌출금(AccountWithdrawRequestDto accountWithdrawRequestDto, Long userId) {
+        // 0원 확인
+        if (accountWithdrawRequestDto.getAmount() <= 0L) throw new CustomApiException("0원 이하의 금액을 입금할 수 없습니다.");
+        // 계좌 존재 확인
+        Account withdrawAccountPS = accountRepository.findByNumber(accountWithdrawRequestDto.getNumber()).orElseThrow(() -> new CustomApiException("계좌를 찾을 수 없습니다."));
+        // 출금 주체 확인(로그인한 사람과 예금주 일치 여부)
+        withdrawAccountPS.checkOwner(userId);
+        // 출금 계좌 비밀번호 확인
+        withdrawAccountPS.checkPassword(accountWithdrawRequestDto.getPassword());
+        // 출금 계좌 잔액 확인
+        withdrawAccountPS.checkBalance(accountWithdrawRequestDto.getAmount());
+        // 출금하기
+        withdrawAccountPS.withdraw(accountWithdrawRequestDto.getAmount());
+        // 거래내역 남기기
+        Transaction tx = Transaction.builder()
+                .depositAccount(null)
+                .withdrawAccount(withdrawAccountPS)
+                .depositAccountBalance(null)
+                .withdrawAccountBalance(withdrawAccountPS.getBalance())
+                .txAmount(accountWithdrawRequestDto.getAmount())
+                .gubun(TransactionEnum.WITHDRAW)
+                .sender(accountWithdrawRequestDto.getNumber()+"")
+                .receiver("ATM")
+                .tel(null)
+                .build();
+        Transaction txPS = transactionRepository.save(tx);
+
+        // DTO 응답
+        return new AccountWithdrawResponseDto(withdrawAccountPS, txPS);
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class AccountWithdrawRequestDto {
+
+        @NotNull
+        @Digits(integer = 4, fraction = 4)
+        private Long number;
+
+        @NotNull
+        @Digits(integer = 4, fraction = 4)
+        private Long password;
+
+        @NotNull
+        private Long amount;
+
+        @NotEmpty
+        @Pattern(regexp = "^(WITHDRAW)$")
+        private String gubun;
     }
 }

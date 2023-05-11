@@ -23,16 +23,16 @@ public class Transaction {
     private Long Id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Account withdrawAccount;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     private Account depositAccount;
 
-    @Column(nullable = false)
-    private Long amount;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Account withdrawAccount;
 
-    private Long withdrawAccountBalance;
+    @Column(nullable = false)
+    private Long txAmount;
+
     private Long depositAccountBalance;
+    private Long withdrawAccountBalance;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -42,7 +42,6 @@ public class Transaction {
     private String sender;
     private String receiver;
     private String tel;
-
 
     @CreatedDate
     @Column(nullable = false)
@@ -54,11 +53,11 @@ public class Transaction {
 
     @Builder
     public Transaction(Long id,
-                       Account withdrawAccount,
                        Account depositAccount,
-                       Long amount,
-                       Long withdrawAccountBalance,
+                       Account withdrawAccount,
+                       Long txAmount,
                        Long depositAccountBalance,
+                       Long withdrawAccountBalance,
                        TransactionEnum gubun,
                        String sender,
                        String receiver,
@@ -66,11 +65,11 @@ public class Transaction {
                        LocalDateTime createdAt,
                        LocalDateTime updatedAt) {
         this.Id = id;
-        this.withdrawAccount = withdrawAccount;
         this.depositAccount = depositAccount;
-        this.amount = amount;
-        this.withdrawAccountBalance = withdrawAccountBalance;
+        this.withdrawAccount = withdrawAccount;
+        this.txAmount = txAmount;
         this.depositAccountBalance = depositAccountBalance;
+        this.withdrawAccountBalance = withdrawAccountBalance;
         this.gubun = gubun;
         this.sender = sender;
         this.receiver = receiver;
