@@ -142,9 +142,9 @@ public class AccountService {
         if (accountTransferRequestDto.getTxAmount() <= 0) throw new CustomApiException("0원 이하의 이체는 불가능합니다.");
 
         // 출금 계좌 확인
-        Account withdrawAccountPS = accountRepository.findById(accountTransferRequestDto.getWithdrawNumber()).orElseThrow(() -> new CustomApiException("출금할 계좌를 찾을 수 없습니다."));
+        Account withdrawAccountPS = accountRepository.findByNumber(accountTransferRequestDto.getWithdrawNumber()).orElseThrow(() -> new CustomApiException("출금할 계좌를 찾을 수 없습니다."));
         // 입금 계좌 확인
-        Account depositAccountPS = accountRepository.findById(accountTransferRequestDto.getDepositNumber()).orElseThrow(() -> new CustomApiException("입금할 계좌를 찾을 수 없습니다."));
+        Account depositAccountPS = accountRepository.findByNumber(accountTransferRequestDto.getDepositNumber()).orElseThrow(() -> new CustomApiException("입금할 계좌를 찾을 수 없습니다."));
 
         // 출금 계좌와 로그인 사용자 일치 확인
         withdrawAccountPS.checkOwner(userId);

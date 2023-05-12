@@ -127,6 +127,7 @@ public class AccountResponseDto {
         }
     }
 
+    @Getter
     public static class AccountTransferResponseDto {
 
         private final Long id; // 계좌 ID

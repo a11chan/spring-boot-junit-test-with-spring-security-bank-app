@@ -22,6 +22,7 @@ import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountDepositRequestDto;
 import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountSaveRequestDto;
+import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountTransferRequestDto;
 import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountWithdrawRequestDto;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
 
@@ -135,7 +136,7 @@ public class AccountControllerTest extends DummyObject {
     @Test
     void withdrawAccount_test() throws Exception {
         //given
-        AccountWithdrawRequestDto withdrawRequest = new AccountWithdrawRequestDto(1111L, 1234L,100L, TransactionEnum.WITHDRAW.name());
+        AccountWithdrawRequestDto withdrawRequest = new AccountWithdrawRequestDto(1111L, 1234L, 100L, TransactionEnum.WITHDRAW.name());
         String requestBody = om.writeValueAsString(withdrawRequest);
 
         //when
@@ -145,6 +146,24 @@ public class AccountControllerTest extends DummyObject {
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
         System.out.println("responseBody = " + responseBody);
         resultActions.andExpect(status().isCreated())
+                .andExpect(jsonPath("$..balance").value(900));
+    }
+
+    @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    void transferAccount_test() throws Exception {
+        //given
+        AccountTransferRequestDto transferRequest = new AccountTransferRequestDto(1111L, 2222L, 1234L, 100L, TransactionEnum.TRANSFER.name());
+        String requestBody = om.writeValueAsString(transferRequest);
+
+        //when
+        ResultActions resultActions = mvc.perform(post("/api/s/account/transfer").contentType(MediaType.APPLICATION_JSON).content(requestBody));
+
+        //then
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+        resultActions.andExpect(status().isCreated())
+//                .andExpect(jsonPath("$..depositAccountBalance").value(1100))
                 .andExpect(jsonPath("$..balance").value(900));
     }
 }
