@@ -17,6 +17,7 @@ import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountDepositRequestDto;
 import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountSaveRequestDto;
+import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountTransferRequestDto;
 import shop.mtcoding.bank.dto.account.AccountResponseDto.AccountDepositResponseDto;
 import shop.mtcoding.bank.dto.account.AccountResponseDto.AccountListResponseDto;
 import shop.mtcoding.bank.dto.account.AccountResponseDto.AccountSaveResponseDto;
@@ -161,5 +162,35 @@ public class AccountServiceTest extends DummyObject {
 
         //then
         assertThat(ssarAccount.getBalance()).isEqualTo(900L);
+    }
+
+    @Test
+    void 계좌이체_test() throws Exception {
+        //given
+        AccountTransferRequestDto transferRequest = new AccountTransferRequestDto(1111L, 2222L, 1234L, 100L, "TRANSFER");
+        User ssar = newMockUser(1L, "ssar", "쌀");
+        User cos = newMockUser(2L, "cos", "코스");
+        Account withdrawAccount = newMockAccount(1L, 1111L, 1000L, ssar);
+        Account depositAccount = newMockAccount(2L, 2222L, 1000L, cos);
+
+        //when
+        if (transferRequest.getWithdrawNumber().equals(transferRequest.getDepositNumber()))
+            throw new CustomApiException("동일한 계좌 간 이체는 불가능합니다.");
+        if (transferRequest.getTxAmount() <= 0) throw new CustomApiException("0원 이하의 이체는 불가능합니다.");
+
+        // 출금 계좌와 로그인 사용자 일치 확인
+        withdrawAccount.checkOwner(1L);
+        // 출금 계좌 비밀번호 일치 확인
+        withdrawAccount.checkPassword(transferRequest.getWithdrawPassword());
+        // 출금 계좌 잔액 확인
+        withdrawAccount.checkBalance(transferRequest.getTxAmount());
+
+        // 이체하기
+        withdrawAccount.withdraw(transferRequest.getTxAmount());
+        depositAccount.deposit(transferRequest.getTxAmount());
+
+        //then
+        assertThat(withdrawAccount.getBalance()).isEqualTo(900);
+        assertThat(depositAccount.getBalance()).isEqualTo(1100);
     }
 }
