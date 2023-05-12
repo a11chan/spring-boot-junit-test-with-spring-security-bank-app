@@ -17,15 +17,19 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.account.AccountRepository;
+import shop.mtcoding.bank.domain.transaction.TransactionEnum;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountDepositRequestDto;
 import shop.mtcoding.bank.dto.account.AccountSaveRequestDto;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
+import shop.mtcoding.bank.service.AccountService;
+import shop.mtcoding.bank.service.AccountService.AccountWithdrawRequestDto;
 
 import javax.persistence.EntityManager;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Sql("classpath:db/teardown.sql") // @Before, @Test, @After 실행 후 동작
@@ -126,5 +130,22 @@ public class AccountControllerTest extends DummyObject {
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
         System.out.println("responseBody = " + responseBody);
         resultActions.andExpect(status().isCreated());
+    }
+
+    @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    void withdrawAccount_test() throws Exception {
+        //given
+        AccountWithdrawRequestDto withdrawRequest = new AccountService.AccountWithdrawRequestDto(1111L, 1234L,100L, TransactionEnum.WITHDRAW.name());
+        String requestBody = om.writeValueAsString(withdrawRequest);
+
+        //when
+        ResultActions resultActions = mvc.perform(post("/api/s/account/withdraw").contentType(MediaType.APPLICATION_JSON).content(requestBody));
+
+        //then
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+        resultActions.andExpect(status().isCreated())
+                .andExpect(jsonPath("$..balance").value(900));
     }
 }

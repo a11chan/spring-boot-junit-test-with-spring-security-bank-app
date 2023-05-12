@@ -2,6 +2,7 @@ package shop.mtcoding.bank.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -137,6 +138,7 @@ public class AccountService {
 
     @Getter
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class AccountWithdrawRequestDto {
 
         @NotNull

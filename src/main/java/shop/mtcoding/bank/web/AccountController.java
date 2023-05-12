@@ -10,6 +10,7 @@ import shop.mtcoding.bank.config.auth.LoginUser;
 import shop.mtcoding.bank.dto.ResponseDto;
 import shop.mtcoding.bank.dto.account.*;
 import shop.mtcoding.bank.service.AccountService;
+import shop.mtcoding.bank.service.AccountService.AccountWithdrawRequestDto;
 
 import javax.validation.Valid;
 
@@ -50,7 +51,7 @@ public class AccountController {
 
     @DeleteMapping(value = "/s/account/{number}")
     public ResponseEntity<?> deleteAccount(@PathVariable Long number, @AuthenticationPrincipal LoginUser loginuser) {
-        accountService.계좌삭제(number,loginuser.getUser().getId());
+        accountService.계좌삭제(number, loginuser.getUser().getId());
         return new ResponseEntity<>(new ResponseDto<>(1, "계좌 삭제 완료", null), HttpStatus.OK);
     }
 
@@ -59,5 +60,12 @@ public class AccountController {
         AccountDepositResponseDto accountDepositResponseDto = accountService.계좌입금(accountDepositRequestDto);
 
         return new ResponseEntity<>(new ResponseDto<>(1, "계좌 입금 완료", accountDepositResponseDto), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/s/account/withdraw")
+    public ResponseEntity<?> withdrawAccount(@RequestBody @Valid AccountWithdrawRequestDto accountWithdrawRequestDto, BindingResult bindingResult, @AuthenticationPrincipal LoginUser loginuser) {
+        AccountWithdrawResponseDto accountWithdrawResponseDto = accountService.계좌출금(accountWithdrawRequestDto, loginuser.getUser().getId());
+
+        return new ResponseEntity<>(new ResponseDto<>(1, "계좌 출금 완료", accountWithdrawResponseDto), HttpStatus.CREATED);
     }
 }
