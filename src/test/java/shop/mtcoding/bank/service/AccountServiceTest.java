@@ -96,7 +96,6 @@ public class AccountServiceTest extends DummyObject {
     @Test
     void 계좌삭제_test() throws Exception {
         //given
-        Long number = 1111L;
         Long userId = 2L; //삭제 시 반환값이 없으므로 유저 아이디가 다를 경우 검증
 
         //stub (가정)
@@ -138,5 +137,25 @@ public class AccountServiceTest extends DummyObject {
         assertThat(ssarAccount1.getBalance()).isEqualTo(1100L);
         assertThat(ssarAccount2.getBalance()).isEqualTo(2100L);
         assertThat(depositResponseDto.getTransactionDto().getDepositAccountBalance()).isEqualTo(2100L);
+    }
+
+    @Test
+    void 계좌출금_test() throws Exception {
+        //given
+        Long txAmount = 100L;
+        Long paasword = 1234L;
+
+        User ssar = newMockUser(1L, "ssar", "쌀");
+        Account ssarAccount = newMockAccount(1L, 1111L, 1000L, ssar);
+
+        //when //Account의 책임이라 Account 도메인 테스트에서 진행할 줄 알았는데, 여기서 진행?
+        if (txAmount <= 0L) throw new CustomApiException("0원 이하의 금액을 입금할 수 없습니다.");
+        ssarAccount.checkOwner(ssar.getId());
+        ssarAccount.checkPassword(paasword);
+        ssarAccount.checkBalance(txAmount);
+        ssarAccount.withdraw(txAmount);
+
+        //then
+        assertThat(ssarAccount.getBalance()).isEqualTo(900L);
     }
 }

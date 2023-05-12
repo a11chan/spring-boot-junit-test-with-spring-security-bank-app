@@ -75,11 +75,12 @@ public class Account {
         if (!this.password.equals(password)) throw new CustomApiException("비밀번호가 올바르지 않습니다.");
     }
 
-    public void checkBalance(Long amount) {
-        if(this.balance < amount) throw new CustomApiException("잔액이 부족합니다.");
+    public void checkBalance(Long txAmount) {
+        if(this.balance < txAmount) throw new CustomApiException("잔액이 부족합니다.");
     }
 
-    public void withdraw(final Long amount) {
-        this.balance -= amount;
+    public void withdraw(final Long txAmount) {
+        checkBalance(txAmount);
+        this.balance -= txAmount;
     }
 }

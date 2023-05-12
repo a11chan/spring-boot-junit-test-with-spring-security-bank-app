@@ -20,7 +20,7 @@ public class DummyObject {
                 .withdrawAccountBalance(null)
                 .depositAccount(account)
                 .depositAccountBalance(account.getBalance())
-                .amount(100L)
+                .txAmount(100L)
                 .gubun(TransactionEnum.DEPOSIT)
                 .sender("ATM")
                 .receiver(account.getNumber() + "")
