@@ -20,11 +20,10 @@ import shop.mtcoding.bank.domain.account.AccountRepository;
 import shop.mtcoding.bank.domain.transaction.TransactionEnum;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
-import shop.mtcoding.bank.dto.account.AccountDepositRequestDto;
-import shop.mtcoding.bank.dto.account.AccountSaveRequestDto;
+import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountDepositRequestDto;
+import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountSaveRequestDto;
+import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountWithdrawRequestDto;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
-import shop.mtcoding.bank.service.AccountService;
-import shop.mtcoding.bank.service.AccountService.AccountWithdrawRequestDto;
 
 import javax.persistence.EntityManager;
 
@@ -136,7 +135,7 @@ public class AccountControllerTest extends DummyObject {
     @Test
     void withdrawAccount_test() throws Exception {
         //given
-        AccountWithdrawRequestDto withdrawRequest = new AccountService.AccountWithdrawRequestDto(1111L, 1234L,100L, TransactionEnum.WITHDRAW.name());
+        AccountWithdrawRequestDto withdrawRequest = new AccountWithdrawRequestDto(1111L, 1234L,100L, TransactionEnum.WITHDRAW.name());
         String requestBody = om.writeValueAsString(withdrawRequest);
 
         //when
