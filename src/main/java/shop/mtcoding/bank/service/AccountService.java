@@ -1,8 +1,5 @@
 package shop.mtcoding.bank.service;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,13 +10,14 @@ import shop.mtcoding.bank.domain.transaction.TransactionEnum;
 import shop.mtcoding.bank.domain.transaction.TransactionRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
-import shop.mtcoding.bank.dto.account.*;
+import shop.mtcoding.bank.dto.account.AccountRequestDto;
+import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountDepositRequestDto;
+import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountSaveRequestDto;
+import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountTransferRequestDto;
+import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountWithdrawRequestDto;
+import shop.mtcoding.bank.dto.account.AccountResponseDto.*;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
 
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import java.util.List;
 import java.util.Optional;
 
@@ -126,7 +124,7 @@ public class AccountService {
                 .withdrawAccountBalance(withdrawAccountPS.getBalance())
                 .txAmount(accountWithdrawRequestDto.getAmount())
                 .gubun(TransactionEnum.WITHDRAW)
-                .sender(accountWithdrawRequestDto.getNumber()+"")
+                .sender(accountWithdrawRequestDto.getNumber() + "")
                 .receiver("ATM")
                 .tel(null)
                 .build();
@@ -136,24 +134,41 @@ public class AccountService {
         return new AccountWithdrawResponseDto(withdrawAccountPS, txPS);
     }
 
-    @Getter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class AccountWithdrawRequestDto {
+    @Transactional
+    public AccountTransferResponseDto 계좌이체(AccountTransferRequestDto accountTransferRequestDto, Long userId) {
+        // 출금 계좌와 입금 계좌가 다른지 확인
+        if (accountTransferRequestDto.getWithdrawNumber().equals(accountTransferRequestDto.getDepositNumber()))
+            throw new CustomApiException("동일한 계좌 간 이체는 불가능합니다.");
+        // 0원 체크
+        if (accountTransferRequestDto.getTxAmount() <= 0) throw new CustomApiException("0원 이하의 이체는 불가능합니다.");
+        // 출금 계좌 확인
+        Account withdrawAccountPS = accountRepository.findById(accountTransferRequestDto.getWithdrawNumber()).orElseThrow(() -> new CustomApiException("출금할 계좌를 찾을 수 없습니다."));
+        // 입금 계좌 확인
+        Account depositAccountPS = accountRepository.findById(accountTransferRequestDto.getDepositNumber()).orElseThrow(() -> new CustomApiException("입금할 계좌를 찾을 수 없습니다."));
+        // 출금 계좌와 로그인 사용자 일치 확인
+        withdrawAccountPS.checkOwner(userId);
+        // 출금 계좌 비밀번호 일치 확인
+        withdrawAccountPS.checkPassword(accountTransferRequestDto.getWithdrawPassword());
+        // 출금 계좌 잔액 확인
+        withdrawAccountPS.checkBalance(accountTransferRequestDto.getTxAmount());
 
-        @NotNull
-        @Digits(integer = 4, fraction = 4)
-        private Long number;
+        // 이체하기
+        withdrawAccountPS.withdraw(accountTransferRequestDto.getTxAmount());
+        depositAccountPS.deposit(accountTransferRequestDto.getTxAmount());
 
-        @NotNull
-        @Digits(integer = 4, fraction = 4)
-        private Long password;
+        // 거래내역 남기기
+        Transaction tx = Transaction.builder()
+                .depositAccount(depositAccountPS)
+                .withdrawAccount(withdrawAccountPS)
+                .depositAccountBalance(depositAccountPS.getBalance())
+                .withdrawAccountBalance(withdrawAccountPS.getBalance())
+                .txAmount(accountTransferRequestDto.getTxAmount())
+                .gubun(TransactionEnum.TRANSFER)
+                .sender(accountTransferRequestDto.getWithdrawNumber() + "")
+                .receiver(accountTransferRequestDto.getDepositNumber() + "")
+                .build();
+        Transaction txPS = transactionRepository.save(tx);
 
-        @NotNull
-        private Long amount;
-
-        @NotEmpty
-        @Pattern(regexp = "^(WITHDRAW)$")
-        private String gubun;
+        return new AccountTransferResponseDto(withdrawAccountPS,txPS);
     }
 }
