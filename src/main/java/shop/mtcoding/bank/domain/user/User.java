@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 public class User { // 시각 정보를 상속받으면 JUnit Test 시 불편?
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
     private Long id;
 
     @Column(unique = true, nullable = false, length = 20)
