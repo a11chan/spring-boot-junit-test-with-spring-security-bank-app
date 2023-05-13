@@ -16,7 +16,8 @@ public class DummyObject {
         withdrawAccount.withdraw(100L);
         depositAccount.deposit(100L);
 
-        //Service 레이어에서 도메인 객체가 변경된 것이 아니어서 티체킹이 안 되기 때문에 직접 반영
+        //Repository Test에서는 더티체킹 됨
+        //Controller Test에서는 안 됨, 그러니 아래와 같이 직접 구현하는 게 좋음
         if (accountRepository != null) {
             accountRepository.save(withdrawAccount);
             accountRepository.save(depositAccount);
@@ -95,6 +96,7 @@ public class DummyObject {
     protected User newUser(String username, String fullname) { //UserResponseDto로 쓰일 예정이라 일부 필드 불필요하여 삭제
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encPassword = passwordEncoder.encode("1234");
+
         return User.builder()
                 .username(username)
                 .password(encPassword)
@@ -107,6 +109,7 @@ public class DummyObject {
     protected User newMockUser(Long id, String username, String fullname) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encPassword = passwordEncoder.encode("1234");
+
         return User.builder()
                 .id(id)
                 .username(username)
