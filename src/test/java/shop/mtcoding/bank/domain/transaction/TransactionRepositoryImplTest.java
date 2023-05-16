@@ -14,6 +14,8 @@ import shop.mtcoding.bank.domain.user.UserRepository;
 import javax.persistence.EntityManager;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @ActiveProfiles(value = "test")
 @DataJpaTest // DB 관련 Bean이 다 올라온다.
 public class TransactionRepositoryImplTest extends DummyObject {
@@ -34,10 +36,11 @@ public class TransactionRepositoryImplTest extends DummyObject {
     public void setUp() {
         autoincrementReset();
         dataSetting();
+        em.clear(); // dummy 데이터 추가 이후 PC 삭제, 테스트마다 DB에 저장된 값을 사용하기 위함, 레포지토리 테스트 시 필수
     }
 
     @Test
-    void findTransactionList_test() throws Exception {
+    void findTransactionList_all_test() throws Exception {
         //given
         Long accountId = 1L;
 
@@ -50,12 +53,13 @@ public class TransactionRepositoryImplTest extends DummyObject {
             System.out.println("테스트 : transaction.getReceiver() = " + transaction.getReceiver());
             System.out.println("테스트 : transaction.getWithdrawAccountBalance() = " + transaction.getWithdrawAccountBalance());
             System.out.println("테스트 : transaction.getDepositAccountBalance() = " + transaction.getDepositAccountBalance());
+            System.out.println("테스트 : transaction.getWithdrawAccount().getBalance() = " + transaction.getWithdrawAccount().getBalance());
+            System.out.println("테스트 : transaction.getWithdrawAccount().getUser().getFullname() = " + transaction.getWithdrawAccount().getUser().getFullname());
             System.out.println("테스트 : =================");
         });
 
         //then
-
-
+        assertThat(transactionListPS.get(3).getDepositAccountBalance()).isEqualTo(800L);
     }
 
     @Test
