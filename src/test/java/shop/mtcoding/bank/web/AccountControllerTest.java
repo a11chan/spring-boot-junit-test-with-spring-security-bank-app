@@ -16,8 +16,11 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import shop.mtcoding.bank.config.dummy.DummyObject;
+import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.account.AccountRepository;
+import shop.mtcoding.bank.domain.transaction.Transaction;
 import shop.mtcoding.bank.domain.transaction.TransactionEnum;
+import shop.mtcoding.bank.domain.transaction.TransactionRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountRequestDto.AccountDepositRequestDto;
@@ -51,19 +54,40 @@ public class AccountControllerTest extends DummyObject {
     private AccountRepository accountRepository;
 
     @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
     private EntityManager em;
 
     @BeforeEach
     void setUp() {
+        dataSetting();
+
         // repository의 메서드가 끝날 때마다 flush()되는 건가?
-        User ssar = userRepository.save(newUser("ssar", "쌀"));
-        User cos = userRepository.save(newUser("cos", "코스"));
-
-        accountRepository.save(newAccount(1111L, ssar));
-        accountRepository.save(newAccount(2222L, cos));
-        accountRepository.save(newAccount(4444L, ssar));
-
         em.clear();
+    }
+
+    private void dataSetting() {
+        User ssar = userRepository.save(newUser("ssar", "쌀"));
+        User cos = userRepository.save(newUser("cos", "코스,"));
+        User love = userRepository.save(newUser("love", "러브"));
+        User admin = userRepository.save(newUser("admin", "관리자"));
+
+        Account ssarAccount1 = accountRepository.save(newAccount(1111L, ssar));
+        Account cosAccount = accountRepository.save(newAccount(2222L, cos));
+        Account loveAccount = accountRepository.save(newAccount(3333L, love));
+        Account ssarAccount2 = accountRepository.save(newAccount(4444L, ssar));
+
+        Transaction withdrawTransaction1 = transactionRepository
+                .save(newWithdrawTransaction(ssarAccount1, accountRepository));
+        Transaction depositTransaction1 = transactionRepository
+                .save(newDepositTransaction(cosAccount, accountRepository));
+        Transaction transferTransaction1 = transactionRepository
+                .save(newTransferTransaction(ssarAccount1, cosAccount, accountRepository));
+        Transaction transferTransaction2 = transactionRepository
+                .save(newTransferTransaction(ssarAccount1, loveAccount, accountRepository));
+        Transaction transferTransaction3 = transactionRepository
+                .save(newTransferTransaction(cosAccount, ssarAccount1, accountRepository));
     }
 
     //setupBefore = TestExecutionEvent.TEST_EXECUTION : @Test 대상 메서드 실행 전에 수행, @BeforeEach보다는 나중에 실행
@@ -165,5 +189,24 @@ public class AccountControllerTest extends DummyObject {
         resultActions.andExpect(status().isCreated())
 //                .andExpect(jsonPath("$..depositAccountBalance").value(1100))
                 .andExpect(jsonPath("$..balance").value(900));
+    }
+
+    @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    void findDetailAccount_Test() throws Exception {
+        //given
+        Long number = 1111L;
+        String page = "0";
+
+        //when
+        ResultActions resultActions = mvc.perform(get("/api/s/account/" + number).param("page", page));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+
+        //then
+        resultActions.andExpect(jsonPath("$.data.transactions[0].balance").value(900L));
+        resultActions.andExpect(jsonPath("$.data.transactions[1].balance").value(800L));
+        resultActions.andExpect(jsonPath("$.data.transactions[2].balance").value(700L));
+        resultActions.andExpect(jsonPath("$.data.transactions[3].balance").value(800L));
     }
 }

@@ -165,4 +165,58 @@ public class AccountResponseDto {
             }
         }
     }
+
+    @Getter
+    public static class AccountDetailResponseDto {
+
+        private final Long id; // accountId
+        private final Long number; // accountNumber
+        private final Long balance; // 계좌 최종 잔액
+        private final List<TransactionDto> transactions;
+
+        public AccountDetailResponseDto(final Account account, final List<Transaction> transactions) {
+            this.id = account.getId();
+            this.number = account.getNumber();
+            this.balance = account.getBalance();
+            this.transactions = transactions.stream()
+                    .map(transaction -> new TransactionDto(transaction, account.getNumber()))
+                    .collect(Collectors.toList());
+        }
+
+        //다른 곳에 있는 Dto를 재사용하지 않고 내부 클래스 활용
+        @Getter
+        public static class TransactionDto {
+
+            private final Long id;
+            private final String gubun;
+            private final Long amount;
+            private final String sender;
+            private final String receiver;
+            private final String tel;
+            private final String createdAt;
+            private final Long balance;
+
+            public TransactionDto(Transaction transaction, Long accountNumber) {
+                this.id = transaction.getId();
+                this.gubun = transaction.getGubun().getValue();
+                this.amount = transaction.getTxAmount();
+                this.sender = transaction.getSender();
+                this.receiver = transaction.getReceiver();
+                this.createdAt = CustomDateUtil.toStringFormat(transaction.getCreatedAt());
+                this.tel = transaction.getTel() == null ? "없음" : transaction.getTel();
+
+                if (transaction.getDepositAccount() == null) {
+                    this.balance = transaction.getWithdrawAccountBalance();
+                } else if (transaction.getWithdrawAccount() == null) {
+                    this.balance = transaction.getDepositAccountBalance();
+                } else {
+                    if (accountNumber.equals(transaction.getDepositAccount().getNumber())) {
+                        this.balance = transaction.getDepositAccountBalance();
+                    } else {
+                        this.balance = transaction.getWithdrawAccountBalance();
+                    }
+                }
+            }
+        }
+    }
 }
