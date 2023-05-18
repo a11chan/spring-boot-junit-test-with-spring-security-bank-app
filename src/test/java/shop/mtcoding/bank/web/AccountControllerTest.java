@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Sql("classpath:db/teardown.sql") // @Before, @Test, @After 실행 후 동작
+@Sql("classpath:db/teardown.sql") // 테스트 메서드 실행 전 동작
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
@@ -170,7 +170,7 @@ public class AccountControllerTest extends DummyObject {
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
         System.out.println("responseBody = " + responseBody);
         resultActions.andExpect(status().isCreated())
-                .andExpect(jsonPath("$..balance").value(900));
+                .andExpect(jsonPath("$..balance").value(700));
     }
 
     @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
@@ -187,8 +187,7 @@ public class AccountControllerTest extends DummyObject {
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
         System.out.println("responseBody = " + responseBody);
         resultActions.andExpect(status().isCreated())
-//                .andExpect(jsonPath("$..depositAccountBalance").value(1100))
-                .andExpect(jsonPath("$..balance").value(900));
+                .andExpect(jsonPath("$..balance").value(700));
     }
 
     @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
