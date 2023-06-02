@@ -20,7 +20,7 @@ public class CustomValidationAdvice {
     public void postMapping() {
     }
 
-    @Pointcut("@annotation(org.springframework.web.bind.annotation.PostMapping)")
+    @Pointcut("@annotation(org.springframework.web.bind.annotation.PutMapping)")
     public void putMapping() {
     }
 

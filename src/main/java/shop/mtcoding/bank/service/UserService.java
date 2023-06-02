@@ -23,7 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    // 서비스 계층 역할 선언:  Dto를 받고 Dto로 응답한다.
+    // 서비스 계층 역할 선언: Dto를 받고 Dto로 응답한다.
     @Transactional
     public JoinResponseDto 회원가입(UserRequestDto userRequestDto) {
         // 1. 동일 유저네임 존재 검사 //Optional 참조변수에 접미사 -OP
