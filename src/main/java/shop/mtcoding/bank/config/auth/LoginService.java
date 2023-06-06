@@ -18,7 +18,7 @@ public class LoginService implements UserDetailsService {
     }
 
     // 시큐리티로 로그인 시, 시큐리티가 loadUserByUsername() 실행해서 username 확인
-    // username이 없으면 어류, 있으면 시큐리티 컨텍스트 내부 세션에 로그인된 세션이 생성됨
+    // username이 없으면 오류, 있으면 시큐리티 컨텍스트 내부 세션에 로그인된 세션이 생성됨
     @Override
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
         User userPS = userRepository.findByUsername(username).orElseThrow(

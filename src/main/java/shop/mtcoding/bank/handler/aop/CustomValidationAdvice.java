@@ -35,6 +35,7 @@ public class CustomValidationAdvice {
 
                 if (bindingResult.hasErrors()) {
                     Map<String, String> errorMap = new HashMap<>();
+
                     for (FieldError error : bindingResult.getFieldErrors()) {
                         errorMap.put(error.getField(), error.getDefaultMessage());
                     }

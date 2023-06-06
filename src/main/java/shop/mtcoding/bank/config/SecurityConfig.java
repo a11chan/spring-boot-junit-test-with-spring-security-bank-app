@@ -87,6 +87,7 @@ public class SecurityConfig {
         configuration.addAllowedOriginPattern("*"); //모든 IP 주소 허용(or FE IP만 허용, 등 필요에 따라 수정)
         configuration.setAllowCredentials(true); //클라이언트의 쿠키 요청/응답 허용
         configuration.addExposedHeader("Authorization"); //예전엔 기본값으로 추가됐지만 지금은 아님
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); //모든 요청에 대해 위 단락에서 설정한 내용 적용
 
